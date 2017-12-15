@@ -1,0 +1,36 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/macpro/Documents/Term7/OS/FScheduler/main.c
+string.h
+-
+queue.h
+/Users/macpro/Documents/Term7/OS/FScheduler/queue.h
+
+/Users/macpro/Documents/Term7/OS/FScheduler/minHeap.c
+minHeap.h
+/Users/macpro/Documents/Term7/OS/FScheduler/minHeap.h
+
+/Users/macpro/Documents/Term7/OS/FScheduler/minHeap.h
+time.h
+-
+stdio.h
+-
+stdlib.h
+-
+stdbool.h
+-
+
+/Users/macpro/Documents/Term7/OS/FScheduler/queue.c
+queue.h
+/Users/macpro/Documents/Term7/OS/FScheduler/queue.h
+
+/Users/macpro/Documents/Term7/OS/FScheduler/queue.h
+minHeap.h
+/Users/macpro/Documents/Term7/OS/FScheduler/minHeap.h
+
