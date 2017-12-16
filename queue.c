@@ -68,11 +68,14 @@ void display(queue *q) {
     }
 }
 
-void display_states(queue *q) {
+int display_states(queue *q) {
     if (!isEmpty(q)){
         for (int i = q->front; i <= q->rear; i++){
             if(q->queue_array[i].state != NULL)
                 printf("process: %d --> %c\t",q->queue_array[i].pid, q->queue_array[i].state);
+            if(q->queue_array[i].state == 'R')
+                return 1;
         }
     }
+    return 0;
 }

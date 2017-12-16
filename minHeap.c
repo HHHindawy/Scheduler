@@ -54,7 +54,7 @@ void buildMinHeap(minHeap *hp, int *arr, int size) {
     }
 }
 
-void insertNode(minHeap *hp, int a_time, int b_time, int io_time, int pid, int time_taken, char state, bool blocked) {
+void insertNode(minHeap *hp, int a_time, int b_time, int io_time, int pid, int time_taken, char state, bool blocked, int turn_time) {
     if (hp->size) {
         hp->elem = realloc(hp->elem, (hp->size + 1) * sizeof(node));
     } else {
@@ -69,6 +69,7 @@ void insertNode(minHeap *hp, int a_time, int b_time, int io_time, int pid, int t
     nd.time_taken = time_taken;
     nd.state = state;
     nd.blocked = blocked;
+    nd.turnaround_time = turn_time;
 
     int i = (hp->size)++;
     while (i && nd.arrival_time < hp->elem[PARENT(i)].arrival_time) {
