@@ -29,6 +29,6 @@ void update_arrival_time(node *nd);
 
 void display(queue *q);
 
-void display_states(queue *q);
+int display_states(queue *q);
 
 #endif //FSCHEDULER_QUEUE_H

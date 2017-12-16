@@ -33,7 +33,7 @@ void heapify(minHeap *hp, int i);
 
 void buildMinHeap(minHeap *hp, int *arr, int size);
 
-void insertNode(minHeap *hp, int a_time, int b_time, int io_time, int pid, int time_taken, char state, bool blocked);
+void insertNode(minHeap *hp, int a_time, int b_time, int io_time, int pid, int time_taken, char state, bool blocked, int turn_time);
 
 node getMinimum(minHeap *hp);
 

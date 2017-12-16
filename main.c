@@ -16,6 +16,7 @@ void update_queue(minHeap *hp);
 int sort_queue();
 
 minHeap processes_heap;
+minHeap finished_heap;
 minHeap blocked_heap;
 queue ready_queue;
 int simulation_time = 0;
@@ -41,19 +42,24 @@ int main() {
 
     update_queue(&processes_heap);
 
-    while(!isEmpty(&ready_queue) || !isEmptyHeap(&processes_heap)){
+    while(!isEmpty(&ready_queue) || !isEmptyHeap(&processes_heap) || !isEmptyHeap(&blocked_heap)){
         update_blocking(&blocked_heap);
         update_states();
         check_running_state();
         if(!isEmpty(&ready_queue) || !isEmptyHeap(&blocked_heap)){
             printf("%d: ",simulation_time);
-            display_states(&ready_queue);
+            busy_cycles += display_states(&ready_queue);
             display_blocked_states(&blocked_heap);
             simulation_time++;
             printf("\n");
         }
         update_queue(&processes_heap);
     }
+
+    printf("Finishing Time: %d\n", simulation_time-1);
+    printf("CPU Utilization: %.2f\n", (1.0*busy_cycles)/(1.0*simulation_time));
+//    for (int i = 0; i < finished_heap.size; i++)
+//        printf("Turnaround Time of Process: %d: %d\n", finished_heap.elem[i].pid, finished_heap.elem[i].turnaround_time);
 
     return 0;
 }
@@ -76,14 +82,28 @@ void check_running_state(){
                                 ready_queue.queue_array[ready_queue.front].burst_time + ready_queue.queue_array[ready_queue.front].io_time))
             ready_queue.queue_array[ready_queue.front].time_taken ++;
         else{
-            node temp = getNext(&ready_queue);
-            if(!temp.blocked){
-                temp.blocked = true;
-                temp.state = 'B';
-                temp.arrival_time += temp.burst_time+temp.io_time;
-                insertNode(&blocked_heap,temp.arrival_time,temp.burst_time,temp.io_time,temp.pid,temp.time_taken,
-                           temp.state,temp.blocked);
-            }else
+            if(ready_queue.queue_array[ready_queue.front].io_time != 0){
+                node temp = getNext(&ready_queue);
+                temp.turnaround_time = simulation_time - temp.turnaround_time +1;
+                insertNode(&finished_heap,temp.arrival_time,temp.burst_time,temp.io_time,temp.pid,temp.time_taken,
+                           temp.state,temp.blocked,temp.turnaround_time);
+//                if(isEmpty(&ready_queue) && isEmptyHeap(&processes_heap) && isEmptyHeap(&blocked_heap))
+//                    printf("%d: process: %d --> %c\n",simulation_time,temp.pid,temp.state);
+                if(temp.time_taken == temp.burst_time+temp.io_time)
+                    ready_queue.queue_array[ready_queue.front].time_taken++;
+                if(!temp.blocked){
+                    temp.blocked = true;
+                    temp.state = 'B';
+                    temp.arrival_time = simulation_time + temp.io_time;
+                    insertNode(&blocked_heap,temp.arrival_time,temp.burst_time,temp.io_time,temp.pid,temp.time_taken,
+                               temp.state,temp.blocked,temp.turnaround_time);
+                }
+            }else if(ready_queue.queue_array[ready_queue.front].io_time == 0 &&
+                    ready_queue.queue_array[ready_queue.front].time_taken > ready_queue.queue_array[ready_queue.front].burst_time*2){
+                getNext(&ready_queue);
+                ready_queue.queue_array[ready_queue.front].time_taken++;
+            }
+            else
                 ready_queue.queue_array[ready_queue.front].time_taken++;
             if(!isEmpty(&ready_queue) && ready_queue.queue_array[ready_queue.front].arrival_time <= simulation_time)
                 ready_queue.queue_array[ready_queue.front].state = 'R';
@@ -110,12 +130,12 @@ void update_queue(minHeap *hp){
         for (int i = 0; i < hp->size; i++) {
             if(next.arrival_time <= simulation_time) {
                 next.state = 'Y';
+                next.turnaround_time = next.arrival_time;
                 insert(&ready_queue, next);
                 getMinimum(hp);
             }
             next = viewMinimum(hp);
         }
-        //sort_queue();
     }
 }
 
@@ -128,7 +148,7 @@ int sort_queue(){
                 flag ++;
     }
 
-    if (!isEmpty(&ready_queue) && flag >= 2){
+    if (!isEmpty(&ready_queue) && flag >= 2 && ready_queue.queue_array[ready_queue.front].state!= 'R'){
         for(int i = ready_queue.front ; i < ready_queue.rear ; i++) {
             for(int j = i+1 ; j < ready_queue.rear +1 ; j++) {
                 if(ready_queue.queue_array[i].pid > ready_queue.queue_array[j].pid) {
@@ -159,6 +179,7 @@ void read_file(char *filename) {
     fclose(fp);
 
     processes_heap = initMinHeap(heap_size);
+    finished_heap = initMinHeap(heap_size);
     blocked_heap = initMinHeap(heap_size);
     ready_queue = initQueue(heap_size);
 
@@ -174,7 +195,7 @@ void read_file(char *filename) {
             times[i++] = pch;
             pch = strtok(NULL, "  \n");
         }
-        insertNode(&processes_heap, atoi(times[3]), atoi(times[1]), atoi(times[2]), atoi(times[0]),0,NULL,false);
+        insertNode(&processes_heap, atoi(times[3]), atoi(times[1]), atoi(times[2]), atoi(times[0]),0,NULL,false,0);
     }
     fclose(fp);
     if (line)
